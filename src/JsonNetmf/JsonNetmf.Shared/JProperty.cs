@@ -20,14 +20,20 @@ namespace PervasiveDigital.Json
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append('"');
-            sb.Append(this.Name);
-            sb.Append("\" : ");
-            sb.Append(this.Value.ToString());
-
-            return sb.ToString();
+            EnterSerialization();
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append('"');
+                sb.Append(this.Name);
+                sb.Append("\" : ");
+                sb.Append(this.Value.ToString());
+                return sb.ToString();
+            }
+            finally
+            {
+                ExitSerialization();
+            }
         }
     }
 }

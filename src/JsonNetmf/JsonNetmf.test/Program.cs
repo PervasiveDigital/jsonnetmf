@@ -9,8 +9,8 @@ namespace JsonNetmf.test
         public int i;
         public UInt32 ui32;
         public string aString;
-        [JsonIgnore] public string ignoreme;
-        [JsonProperty(Name = "otherName")] public string someName;
+        public string ignoreme;
+        public string someName;
         public DateTime Timestamp;
     }
     public class Program

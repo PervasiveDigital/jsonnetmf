@@ -25,7 +25,7 @@ namespace PervasiveDigital.Json
                 {
                     case MemberTypes.Field:
                     case MemberTypes.Property:
-                        if (f.FieldType.IsValueType)
+                        if (f.FieldType.IsValueType || f.FieldType==typeof(string))
                             result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JValue.Serialize(f.FieldType, f.GetValue(oSource))));
                         else
                             result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JObject.Serialize(f.FieldType, f.GetValue(oSource))));
@@ -40,15 +40,29 @@ namespace PervasiveDigital.Json
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append('{');
-            foreach (var member in _members.Values)
+            EnterSerialization();
+            try
             {
-                sb.Append(((JProperty) member).ToString());
+                StringBuilder sb = new StringBuilder();
+
+                sb.AppendLine(Indent(true) + "{");
+                bool first = true;
+                foreach (var member in _members.Values)
+                {
+                    if (!first)
+                        sb.AppendLine(",");
+                    first = false;
+                    sb.Append(Indent() + ((JProperty)member).ToString());
+                }
+                sb.AppendLine();
+                Outdent();
+                sb.AppendLine(Indent() + "}");
+                return sb.ToString();
             }
-            sb.Append('}');
-            return sb.ToString();
+            finally
+            {
+                ExitSerialization();
+            }
         }
     }
 }
