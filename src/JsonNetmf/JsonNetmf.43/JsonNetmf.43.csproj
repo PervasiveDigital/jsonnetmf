@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.SPOT.Native" />
     <Reference Include="System" />
+    <Reference Include="System.IO" />
   </ItemGroup>
   <Import Project="..\JsonNetmf.Shared\JsonNetmf.Shared.projitems" Label="Shared" />
   <Import Condition="EXISTS('$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets')" Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />

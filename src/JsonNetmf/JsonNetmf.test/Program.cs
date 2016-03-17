@@ -27,7 +27,10 @@ namespace JsonNetmf.test
             };
             var result = JsonConverter.Serialize(test);
             Debug.Print("Serialization:");
-            Debug.Print(result.ToString());
+            var stringValue = result.ToString();
+            Debug.Print(stringValue);
+
+            var dserResult = JsonConverter.Deserialize(stringValue);
         }
     }
 }
