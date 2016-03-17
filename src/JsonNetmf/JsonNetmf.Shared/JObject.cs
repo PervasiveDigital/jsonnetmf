@@ -20,6 +20,11 @@ namespace PervasiveDigital.Json
             }
         }
 
+        public ICollection Members
+        {
+            get { return _members.Values; }
+        }
+
         public void Add(string name, JToken value)
         {
             _members.Add(name.ToLower(), new JProperty(name, value));

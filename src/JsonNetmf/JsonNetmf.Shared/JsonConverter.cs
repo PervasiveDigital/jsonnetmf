@@ -10,6 +10,8 @@ namespace PervasiveDigital.Json
 {
     // The protocol mantra: Be strict in what you emit, and generous in what you accept.
 
+    public delegate object InstanceFactory(string instancePath, string fieldName, int length);
+
     public static class JsonConverter
     {
         private enum TokenType
@@ -38,6 +40,84 @@ namespace PervasiveDigital.Json
                 return JArray.Serialize(type, oSource);
             else
                 return JObject.Serialize(type, oSource);
+        }
+
+        public static object DeserializeObject(string sourceString, Type type, InstanceFactory factory = null)
+        {
+            var dserResult = Deserialize(sourceString);
+            return PopulateObject(dserResult, type, factory);
+        }
+
+        public static object DeserializeObject(Stream stream, Type type, InstanceFactory factory = null)
+        {
+            var dserResult = Deserialize(stream);
+            return PopulateObject(dserResult, type, factory);
+        }
+
+        public static object DeserializeObject(StreamReader sr, Type type, InstanceFactory factory = null)
+        {
+            var dserResult = Deserialize(sr);
+            return PopulateObject(dserResult, type, factory);
+        }
+
+        private static object PopulateObject(JToken root, Type type, InstanceFactory factory)
+        { 
+            if (root is JObject)
+            {
+                object instance;
+                if (type == null)
+                    instance = factory(null, null, -1);
+                else
+                    instance = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
+                var jobj = (JObject) root;
+                foreach (var item in jobj.Members)
+                {
+                    var prop = (JProperty)item;
+                    var field = type.GetField(prop.Name);
+                    if (field != null)
+                    {
+                        if (prop.Value is JValue)
+                        {
+                            if (field.FieldType != typeof (DateTime)) //TODO: date conversion not quite supported yet
+                                field.SetValue(instance, ((JValue) prop.Value).Value);
+                        }
+                        else if (prop.Value is JArray)
+                        {
+                            if  (factory==null)
+                                throw new NotSupportedException("You must provide an instance factory if you want to populate objects that have arrays in them");
+
+                            var jarray = (JArray)prop.Value;
+                            var list = new ArrayList();
+                            var array = (Array)factory(null, prop.Name, jarray.Length);
+                            //var array = Array.CreateInstance(field.FieldType.GetElementType(), jarray.Length);
+                            foreach (var elem in jarray.Items)
+                            {
+                                list.Add(elem.Value);
+                            }
+                            list.CopyTo(array);
+                            field.SetValue(instance, array);
+                        }
+                    }
+                }
+                return instance;
+            }
+            else if (root is JArray)
+            {
+                if (factory == null)
+                    throw new NotSupportedException("You must provide an instance factory if you want to populate objects that have arrays in them");
+
+                var jarray = (JArray)root;
+                var list = new ArrayList();
+                var array = (Array)factory(null, null, jarray.Length);
+                //var array = Array.CreateInstance(type.GetElementType(), jarray.Length);
+                foreach (var item in jarray.Items)
+                {
+                    list.Add(item.Value);
+                }
+                list.CopyTo(array);
+                return array;
+            }
+            return null;
         }
 
         public static JToken Deserialize(string sourceString)
@@ -271,7 +351,6 @@ namespace PervasiveDigital.Json
                     }
                 }
             }
-            return EndToken(sb);
         }
 
         private static LexToken EndToken(StringBuilder sb)

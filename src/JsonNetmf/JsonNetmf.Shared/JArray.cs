@@ -25,6 +25,16 @@ namespace PervasiveDigital.Json
             }
         }
 
+        public int Length
+        {
+            get { return _contents.Length; }
+        }
+
+        public JValue[] Items
+        {
+            get {  return _contents; }
+        }
+
         public static JArray Serialize(Type type, object oSource)
         {
             return new JArray((Array)oSource);
