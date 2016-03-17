@@ -15,5 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)JProperty.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JToken.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeExtensions.cs" />
   </ItemGroup>
 </Project>

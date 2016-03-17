@@ -49,7 +49,7 @@ namespace JsonNetmf.test
 
             var newInstance = (TestClass)JsonConverter.DeserializeObject(stringValue, typeof (TestClass), CreateInstance);
             if (test.i!=newInstance.i ||
-//  not currently supported:  test.Timestamp != newInstance.Timestamp ||
+                test.Timestamp.ToString() != newInstance.Timestamp.ToString() ||
                 test.aString != newInstance.aString ||
                 test.someName != newInstance.someName ||
                 !ArraysAreEqual(test.intArray, newInstance.intArray) ||

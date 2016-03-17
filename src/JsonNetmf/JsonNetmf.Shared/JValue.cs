@@ -33,7 +33,7 @@ namespace PervasiveDigital.Json
                 if (type == typeof(string) || type == typeof(char))
                     return "\"" + this.Value.ToString() + "\"";
                 else if (type == typeof(DateTime))
-                    return "\"" + ((DateTime)this.Value).ToString("r") + "\"";
+                    return "\"" + DateTimeExtensions.ToIso8601(((DateTime)this.Value)) + "\"";
                 else
                     return this.Value.ToString();
             }

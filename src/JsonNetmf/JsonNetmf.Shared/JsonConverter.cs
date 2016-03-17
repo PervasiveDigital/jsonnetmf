@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Microsoft.SPOT;
+using PervasiveDigital.Utilities;
 
 namespace PervasiveDigital.Json
 {
@@ -108,13 +109,38 @@ namespace PervasiveDigital.Json
                         {
                             if (field != null)
                             {
-                                if (itemType != typeof (DateTime)) //TODO: date conversion not quite supported yet
+                                if (itemType != typeof (DateTime))
+                                {
                                     field.SetValue(instance, ((JValue) prop.Value).Value);
+                                }
+                                else
+                                {
+                                    DateTime dt;
+                                    var sdt = ((JValue) prop.Value).Value.ToString();
+                                    if (sdt.Contains("Date("))
+                                        dt = DateTimeExtensions.FromASPNetAjax(sdt);
+                                    else
+                                        dt = DateTimeExtensions.FromIso8601(sdt);
+                                    field.SetValue(instance, dt);
+                                }
                             }
                             else
                             {
-                                if (itemType != typeof(DateTime)) //TODO: date conversion not quite supported yet
-                                    method.Invoke(instance, new object[] {((JValue)prop.Value).Value });
+                                if (itemType != typeof (DateTime))
+                                {
+                                    method.Invoke(instance, new object[] {((JValue) prop.Value).Value});
+                                }
+                                else
+                                {
+                                    DateTime dt;
+                                    var sdt = ((JValue)prop.Value).Value.ToString();
+                                    if (sdt.Contains("Date("))
+                                        dt = DateTimeExtensions.FromASPNetAjax(sdt);
+                                    else
+                                        dt = DateTimeExtensions.FromIso8601(sdt);
+
+                                    method.Invoke(instance, new object[] {dt});
+                                }
                             }
                         }
                         else if (prop.Value is JArray)
