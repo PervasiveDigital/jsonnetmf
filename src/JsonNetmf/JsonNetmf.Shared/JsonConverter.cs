@@ -75,8 +75,21 @@ namespace PervasiveDigital.Json
                 foreach (var item in jobj.Members)
                 {
                     var prop = (JProperty)item;
+                    MethodInfo method = null;
+                    Type itemType = null;
                     var field = type.GetField(prop.Name);
                     if (field != null)
+                    {
+                        itemType = field.FieldType;
+                    }
+                    else
+                    {
+                        method = type.GetMethod("get_" + prop.Name);
+                        itemType = method.ReturnType;
+                        method = type.GetMethod("set_" + prop.Name);
+                    }
+
+                    if (itemType!=null)
                     {
                         if (prop.Value is JObject)
                         {
@@ -85,13 +98,24 @@ namespace PervasiveDigital.Json
                                 childpath = childpath + '/' + prop.Name;
                             else
                                 childpath += prop.Name;
-                            var child = PopulateObject(prop.Value, field.FieldType, childpath, factory);
-                            field.SetValue(instance, child);
+                            var child = PopulateObject(prop.Value, itemType, childpath, factory);
+                            if (field != null)
+                                field.SetValue(instance, child);
+                            else
+                                method.Invoke(instance, new object[] { child });
                         }
                         else if (prop.Value is JValue)
                         {
-                            if (field.FieldType != typeof (DateTime)) //TODO: date conversion not quite supported yet
-                                field.SetValue(instance, ((JValue) prop.Value).Value);
+                            if (field != null)
+                            {
+                                if (itemType != typeof (DateTime)) //TODO: date conversion not quite supported yet
+                                    field.SetValue(instance, ((JValue) prop.Value).Value);
+                            }
+                            else
+                            {
+                                if (itemType != typeof(DateTime)) //TODO: date conversion not quite supported yet
+                                    method.Invoke(instance, new object[] {((JValue)prop.Value).Value });
+                            }
                         }
                         else if (prop.Value is JArray)
                         {
@@ -107,7 +131,10 @@ namespace PervasiveDigital.Json
                                 list.Add(elem.Value);
                             }
                             list.CopyTo(array);
-                            field.SetValue(instance, array);
+                            if (field != null)
+                                field.SetValue(instance, array);
+                            else
+                                method.Invoke(instance, new object[] {array});
                         }
                     }
                 }
