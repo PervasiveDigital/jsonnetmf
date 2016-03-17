@@ -78,7 +78,7 @@ namespace JsonNetmf.test
                 return false;
             for (int i = 0; i < a1.Length; ++i)
             {
-                if (!a1.GetValue(0).Equals(a2.GetValue(0)))
+                if (!a1.GetValue(i).Equals(a2.GetValue(i)))
                     return false;
             }
             return true;
