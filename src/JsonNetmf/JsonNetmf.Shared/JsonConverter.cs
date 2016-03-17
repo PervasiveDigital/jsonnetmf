@@ -45,30 +45,32 @@ namespace PervasiveDigital.Json
         public static object DeserializeObject(string sourceString, Type type, InstanceFactory factory = null)
         {
             var dserResult = Deserialize(sourceString);
-            return PopulateObject(dserResult, type, factory);
+            return PopulateObject(dserResult, type, "/", factory);
         }
 
         public static object DeserializeObject(Stream stream, Type type, InstanceFactory factory = null)
         {
             var dserResult = Deserialize(stream);
-            return PopulateObject(dserResult, type, factory);
+            return PopulateObject(dserResult, type, "/", factory);
         }
 
         public static object DeserializeObject(StreamReader sr, Type type, InstanceFactory factory = null)
         {
             var dserResult = Deserialize(sr);
-            return PopulateObject(dserResult, type, factory);
+            return PopulateObject(dserResult, type, "/", factory);
         }
 
-        private static object PopulateObject(JToken root, Type type, InstanceFactory factory)
+        private static object PopulateObject(JToken root, Type type, string path, InstanceFactory factory)
         { 
             if (root is JObject)
             {
-                object instance;
+                object instance = null;
                 if (type == null)
-                    instance = factory(null, null, -1);
-                else
+                    instance = factory(path, null, -1);
+                if (instance==null)
                     instance = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(type.Assembly.FullName, type.FullName);
+                if (instance == null)
+                    throw new Exception("failed to create target instance");
                 var jobj = (JObject) root;
                 foreach (var item in jobj.Members)
                 {
@@ -76,7 +78,17 @@ namespace PervasiveDigital.Json
                     var field = type.GetField(prop.Name);
                     if (field != null)
                     {
-                        if (prop.Value is JValue)
+                        if (prop.Value is JObject)
+                        {
+                            var childpath = path;
+                            if (childpath[childpath.Length - 1] != '/')
+                                childpath = childpath + '/' + prop.Name;
+                            else
+                                childpath += prop.Name;
+                            var child = PopulateObject(prop.Value, field.FieldType, childpath, factory);
+                            field.SetValue(instance, child);
+                        }
+                        else if (prop.Value is JValue)
                         {
                             if (field.FieldType != typeof (DateTime)) //TODO: date conversion not quite supported yet
                                 field.SetValue(instance, ((JValue) prop.Value).Value);
@@ -88,7 +100,7 @@ namespace PervasiveDigital.Json
 
                             var jarray = (JArray)prop.Value;
                             var list = new ArrayList();
-                            var array = (Array)factory(null, prop.Name, jarray.Length);
+                            var array = (Array)factory(path, prop.Name, jarray.Length);
                             //var array = Array.CreateInstance(field.FieldType.GetElementType(), jarray.Length);
                             foreach (var elem in jarray.Items)
                             {
@@ -108,7 +120,7 @@ namespace PervasiveDigital.Json
 
                 var jarray = (JArray)root;
                 var list = new ArrayList();
-                var array = (Array)factory(null, null, jarray.Length);
+                var array = (Array)factory(path, null, jarray.Length);
                 //var array = Array.CreateInstance(type.GetElementType(), jarray.Length);
                 foreach (var item in jarray.Items)
                 {

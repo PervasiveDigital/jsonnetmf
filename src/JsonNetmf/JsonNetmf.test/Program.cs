@@ -4,6 +4,14 @@ using PervasiveDigital.Json;
 
 namespace JsonNetmf.test
 {
+
+    public class ChildClass
+    {
+        public int one;
+        public int two;
+        public int three;
+    }
+
     public class TestClass
     {
         public int i;
@@ -12,6 +20,8 @@ namespace JsonNetmf.test
         public DateTime Timestamp;
         public int[] intArray;
         public string[] stringArray;
+        public ChildClass child1;
+        public ChildClass Child { get; set; }
     }
     public class Program
     {
@@ -24,7 +34,9 @@ namespace JsonNetmf.test
                 someName = "who?",
                 Timestamp = DateTime.UtcNow,
                 intArray = new [] { 1, 3, 5, 7, 9 },
-                stringArray = new [] { "two", "four", "six", "eight" }
+                stringArray = new [] { "two", "four", "six", "eight" },
+                child1 = new ChildClass() { one=1, two = 2, three = 3 },
+                Child = new ChildClass() {  one = 100, two = 200, three = 300 }
             };
             var result = JsonConverter.Serialize(test);
             Debug.Print("Serialization:");
@@ -53,7 +65,7 @@ namespace JsonNetmf.test
             else if (name == "stringArray")
                 return new string[length];
             else
-                throw new Exception("did not expect to be called for type " + name);
+                return null;
         }
 
         private static bool ArraysAreEqual(Array a1, Array a2)

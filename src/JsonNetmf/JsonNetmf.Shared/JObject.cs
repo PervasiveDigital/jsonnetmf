@@ -33,10 +33,29 @@ namespace PervasiveDigital.Json
         public static JObject Serialize(Type type, object oSource)
         {
             var result = new JObject();
+            var methods = type.GetMethods();
+            foreach (var m in methods)
+            {
+                if (!m.IsPublic)
+                    continue;
+
+                if (m.Name.IndexOf("get_") == 0)
+                {
+                    var name = m.Name.Substring(4);
+                    var methodResult = m.Invoke(oSource, null);
+                    if (m.ReturnType.IsArray)
+                        result._members.Add(name.ToLower(), new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
+                    else
+                        result._members.Add(name.ToLower(), new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
+                }
+            }
 
             var fields = type.GetFields();
             foreach (var f in fields)
             {
+                if (f.FieldType.IsNotPublic)
+                    continue;
+
                 switch (f.MemberType)
                 {
                     case MemberTypes.Field:
@@ -78,7 +97,7 @@ namespace PervasiveDigital.Json
                 }
                 sb.AppendLine();
                 Outdent();
-                sb.AppendLine(Indent() + "}");
+                sb.Append(Indent() + "}");
                 return sb.ToString();
             }
             finally
