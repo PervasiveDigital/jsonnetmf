@@ -12,6 +12,8 @@ namespace JsonNetmf.test
         public string ignoreme;
         public string someName;
         public DateTime Timestamp;
+        public int[] intArray;
+        public string[] stringArray;
     }
     public class Program
     {
@@ -23,7 +25,9 @@ namespace JsonNetmf.test
                 i = 10,
                 ignoreme = "who me?",
                 someName = "who?",
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                intArray = new [] { 1, 3, 5, 7, 9 },
+                stringArray = new [] { "two", "four", "six", "eight" }
             };
             var result = JsonConverter.Serialize(test);
             Debug.Print("Serialization:");

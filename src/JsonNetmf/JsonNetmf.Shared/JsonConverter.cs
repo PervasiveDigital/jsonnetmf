@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -34,7 +35,7 @@ namespace PervasiveDigital.Json
         {
             var type = oSource.GetType();
             if (type.IsArray)
-                return JArray.Serialize(oSource);
+                return JArray.Serialize(type, oSource);
             else
                 return JObject.Serialize(type, oSource);
         }
@@ -64,14 +65,14 @@ namespace PervasiveDigital.Json
                     if (token.TType == TokenType.RBrace)
                         token = GetNextToken(sourceReader);
                     else if (token.TType != TokenType.End && token.TType != TokenType.Error)
-                        throw new Exception("unterminated json object");
+                        throw new Exception("unexpected content after end of object");
                     break;
                 case TokenType.LArray:
                     result = ParseArray(sourceReader, ref token);
                     if (token.TType == TokenType.RArray)
                         token = GetNextToken(sourceReader);
                     else if (token.TType != TokenType.End && token.TType != TokenType.Error)
-                        throw new Exception("unterminated json array");
+                        throw new Exception("unexpected content after end of array");
                     break;
                 default:
                     throw new Exception("unexpected initial token in json parse");
@@ -106,12 +107,29 @@ namespace PervasiveDigital.Json
                     token = GetNextToken(sr);
 
             } while (token.TType != TokenType.End && token.TType != TokenType.Error && token.TType != TokenType.RBrace);
+            if (token.TType == TokenType.Error)
+                throw new Exception("unexpected token in json object");
+            else if (token.TType!=TokenType.RBrace)
+                throw new Exception("unterminated json object");
             return result;
         }
 
         private static JArray ParseArray(StreamReader sr, ref LexToken token)
         {
-            return null;
+            Debug.Assert(token.TType == TokenType.LArray);
+            ArrayList list = new ArrayList();
+            do
+            {
+                var value = ParseValue(sr, ref token);
+                list.Add(value);
+                token = GetNextToken(sr);
+            } while (token.TType != TokenType.End && token.TType != TokenType.Error && token.TType != TokenType.RArray);
+            if (token.TType==TokenType.Error)
+                throw new Exception("unexpected token in array");
+            else if (token.TType != TokenType.RArray)
+                throw new Exception("unterminated json array");
+            var result = new JArray((JValue[])list.ToArray(typeof(JValue)));
+            return result;
         }
         private static JToken ParseValue(StreamReader sr, ref LexToken token)
         {
@@ -199,7 +217,11 @@ namespace PervasiveDigital.Json
                     while (IsNumberChar(ch))
                     {
                         sb.Append(ch);
-                        ch = (char)sourceReader.Read();
+                        // Don't consume chars that are not part of the number
+                        ch = (char)sourceReader.Peek();
+                        if (IsNumberChar(ch))
+                            sourceReader.Read();
+
                         if (ch == (char)0xffff)
                             return EndToken(sb);
                     }

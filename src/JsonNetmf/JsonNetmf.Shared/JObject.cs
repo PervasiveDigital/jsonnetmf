@@ -36,10 +36,16 @@ namespace PervasiveDigital.Json
                 {
                     case MemberTypes.Field:
                     case MemberTypes.Property:
-                        if (f.FieldType.IsValueType || f.FieldType==typeof(string))
-                            result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JValue.Serialize(f.FieldType, f.GetValue(oSource))));
+                        if (f.FieldType.IsValueType || f.FieldType == typeof (string))
+                            result._members.Add(f.Name.ToLower(),
+                                new JProperty(f.Name, JValue.Serialize(f.FieldType, f.GetValue(oSource))));
                         else
-                            result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JObject.Serialize(f.FieldType, f.GetValue(oSource))));
+                        {
+                            if (f.FieldType.IsArray)
+                                result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JArray.Serialize(f.FieldType, f.GetValue(oSource))));
+                            else
+                                result._members.Add(f.Name.ToLower(), new JProperty(f.Name, JObject.Serialize(f.FieldType, f.GetValue(oSource))));
+                        }
                         break;
                     default:
                         break;
