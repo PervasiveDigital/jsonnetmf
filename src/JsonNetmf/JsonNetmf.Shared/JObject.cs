@@ -12,6 +12,17 @@ namespace PervasiveDigital.Json
         public JProperty this[string name]
         {
             get { return (JProperty)_members[name.ToLower()]; }
+            set
+            {
+                if (name.ToLower()!=value.Name.ToLower())
+                    throw new ArgumentException("index value must match property name");
+                _members.Add(value.Name.ToLower(), value);
+            }
+        }
+
+        public void Add(string name, JToken value)
+        {
+            _members.Add(name.ToLower(), new JProperty(name, value));
         }
 
         public static JObject Serialize(Type type, object oSource)

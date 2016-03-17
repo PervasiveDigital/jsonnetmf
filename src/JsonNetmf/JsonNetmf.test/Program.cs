@@ -31,6 +31,8 @@ namespace JsonNetmf.test
             Debug.Print(stringValue);
 
             var dserResult = JsonConverter.Deserialize(stringValue);
+            Debug.Print("After deserialization:");
+            Debug.Print(dserResult.ToString());
         }
     }
 }

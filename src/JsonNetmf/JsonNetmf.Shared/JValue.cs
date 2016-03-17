@@ -5,6 +5,15 @@ namespace PervasiveDigital.Json
 {
     public class JValue : JToken
     {
+        public JValue()
+        {
+        }
+
+        public JValue(object value)
+        {
+            this.Value = value;
+        }
+
         public object Value { get; set; }
 
         public static JValue Serialize(Type type, object oValue)
