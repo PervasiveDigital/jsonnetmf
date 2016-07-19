@@ -234,3 +234,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+/src/JsonNetmf/JsonNetmf.test/OnBoardFlash.dat.smd
+/src/JsonNetmf/JsonNetmf.test/OnBoardFlash.dat
