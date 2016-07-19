@@ -13,8 +13,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)JArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JsonConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)JsonIgnoreAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)JsonPropertyAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JProperty.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JToken.cs" />

@@ -56,6 +56,10 @@ namespace JsonNetmf.test
                 !ArraysAreEqual(test.stringArray, newInstance.stringArray)
                 )
                 throw new Exception("round-tripping failed");
+
+            // bson tests
+            var bson = result.ToBson();
+            var compare = JsonConverter.FromBson(bson, typeof(TestClass));
         }
 
         private static object CreateInstance(string path, string name, int length)
