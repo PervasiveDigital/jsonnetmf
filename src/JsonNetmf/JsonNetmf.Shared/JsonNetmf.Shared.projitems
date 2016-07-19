@@ -9,6 +9,7 @@
     <Import_RootNamespace>PervasiveDigital.Json</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)BsonTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JArray.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JsonConverter.cs" />
@@ -17,5 +18,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)JProperty.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JToken.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SerializationUtilities.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeExtensions.cs" />
   </ItemGroup>
 </Project>

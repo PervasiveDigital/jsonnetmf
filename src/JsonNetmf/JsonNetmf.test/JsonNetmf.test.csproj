@@ -8,7 +8,7 @@
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{9EEEEC67-FA89-41A3-9240-918829D8E2EE}</ProjectGuid>
-    <TargetFrameworkVersion>v4.3</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -54,9 +54,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JsonNetmf.43\JsonNetmf.43.csproj">
-      <Project>{C24739C9-BB88-4020-94BA-CA72F3F528D2}</Project>
-      <Name>JsonNetmf.43</Name>
+    <ProjectReference Include="..\JsonNetmf.44\JsonNetmf.44.csproj">
+      <Project>{CD7F644C-4363-48B6-88B2-C4D086FC0D2C}</Project>
+      <Name>JsonNetmf.44</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Condition="EXISTS('$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets')" Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
