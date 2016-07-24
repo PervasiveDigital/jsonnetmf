@@ -130,10 +130,11 @@ namespace PervasiveDigital.Json
 					result = new DateTime((long)Unmarshall(buffer, ref offset, TypeCode.Int64));
 					break;
 				case TypeCode.String:
-					var len = (int)(buffer[offset] | buffer[offset + 1] << 8);
-					offset += 2;
-					result = new string(Encoding.UTF8.GetChars(buffer, offset, len));
-					offset += len;
+                    var idxNul = JToken.FindNul(buffer, offset);
+                    if (idxNul == -1)
+                        throw new Exception("Missing ename terminator");
+                    result = JToken.ConvertToString(buffer, offset, idxNul - offset);
+                    offset = idxNul + 1;
 					break;
 				default:
 					throw new Exception("Unsupported type");

@@ -256,13 +256,21 @@ namespace PervasiveDigital.Json
             while (offset < buffer.Length)
             {
                 var bsonType = (BsonTypes)buffer[offset++];
+
+                // eat the empty ename
+                var idxNul = JToken.FindNul(buffer, offset);
+                if (idxNul == -1)
+                    throw new Exception("Missing ename terminator");
+                var ename = JToken.ConvertToString(buffer, offset, idxNul - offset);
+                offset = idxNul + 1;
+
                 switch (bsonType)
                 {
                     case BsonTypes.BsonDocument:
-                        dserResult = JObject.FromBson(buffer, factory);
+                        dserResult = JObject.FromBson(buffer, ref offset, factory);
                         break;
                     case BsonTypes.BsonArray:
-                        dserResult = JArray.FromBson(buffer, factory);
+                        dserResult = JArray.FromBson(buffer, ref offset, factory);
                         break;
                     default:
                         throw new Exception("unexpected top-level object type in bson");

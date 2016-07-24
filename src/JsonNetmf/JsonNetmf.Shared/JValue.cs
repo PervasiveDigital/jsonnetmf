@@ -79,8 +79,15 @@ namespace PervasiveDigital.Json
 
 		public override void ToBson(byte[] buffer, ref int offset)
 		{
-			if (this.Value != null)
-				SerializationUtilities.Marshall(buffer, ref offset, this.Value);
+            if (buffer != null)
+            {
+                if (this.Value != null)
+                    SerializationUtilities.Marshall(buffer, ref offset, this.Value);
+            }
+            else
+            {
+                offset += this.GetBsonSize();
+            }
 		}
 
         public override BsonTypes GetBsonType()
@@ -106,5 +113,33 @@ namespace PervasiveDigital.Json
             else
                 throw new Exception("Unsupported type");
         }
+
+        internal static JValue FromBson(BsonTypes bsonType, byte[] buffer, ref int offset)
+        {
+            switch (bsonType)
+            {
+                case BsonTypes.BsonBoolean:
+                    return new JValue(buffer[offset++] != 0 ? true : false);
+                case BsonTypes.BsonDateTime:
+                    var dt = (DateTime)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.DateTime);
+                    return new JValue(dt);
+                case BsonTypes.BsonDouble:
+                    var dbl = (double)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Double);
+                    return new JValue(dbl);
+                case BsonTypes.BsonInt32:
+                    var i32 = (Int32)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int32);
+                    return new JValue(i32);
+                case BsonTypes.BsonInt64:
+                    var i64 = (Int64)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int64);
+                    return new JValue(i64);
+                case BsonTypes.BsonString:
+                    var str = (string)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.String);
+                    return new JValue(str);
+                default:
+                    throw new Exception("Unsupported type");
+            }
+
+        }
+
     }
 }

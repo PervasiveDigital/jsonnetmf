@@ -126,15 +126,12 @@ namespace PervasiveDigital.Json
 
 		public override int GetBsonSize()
 		{
-			var result = 0;
-			foreach (DictionaryEntry member in _members)
-			{
-				result += ((JProperty)member.Value).GetBsonSize(member.Key.ToString());
-			}
-			return result + 5;  // four bytes of size plus trailing nul
-		}
+            int offset = 0;
+            this.ToBson(null, ref offset);
+            return offset;
+        }
 
-		public override int GetBsonSize(string ename)
+        public override int GetBsonSize(string ename)
 		{
 			return 1 + ename.Length + 1 + this.GetBsonSize();
 		}
@@ -152,10 +149,13 @@ namespace PervasiveDigital.Json
             }
 
             // Write the trailing nul
-            buffer[offset++] = (byte)0;
+            if (buffer!=null)
+                buffer[offset] = (byte)0;
+            ++offset;
 
             // Write the completed size
-            SerializationUtilities.Marshall(buffer, ref startingOffset, offset);
+            if (buffer!=null)
+                SerializationUtilities.Marshall(buffer, ref startingOffset, offset);
 		}
 
         public override BsonTypes GetBsonType()
@@ -163,9 +163,45 @@ namespace PervasiveDigital.Json
             return BsonTypes.BsonDocument;
         }
 
-        internal static JObject FromBson(byte[] buffer, InstanceFactory factory = null)
+        internal static JObject FromBson(byte[] buffer, ref int offset, InstanceFactory factory = null)
         {
-            throw new NotImplementedException();
+            JObject result = new JObject();
+
+            int len = (Int32)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int32);
+
+            while (offset < offset+len)
+            {
+                // get the element type
+                var bsonType = (BsonTypes)buffer[offset++];
+                // get the element name
+                var idxNul = JToken.FindNul(buffer, offset);
+                if (idxNul == -1)
+                    throw new Exception("Missing ename terminator");
+                var ename = JToken.ConvertToString(buffer, offset, idxNul - offset);
+                offset = idxNul + 1;
+
+                JToken item = null;
+                switch (bsonType)
+                {
+                    case BsonTypes.BsonArray:
+                    case BsonTypes.BsonDocument:
+                        throw new NotImplementedException();
+                    case BsonTypes.BsonNull:
+                        item = new JValue();
+                        break;
+                    case BsonTypes.BsonBoolean:
+                    case BsonTypes.BsonDateTime:
+                    case BsonTypes.BsonDouble:
+                    case BsonTypes.BsonInt32:
+                    case BsonTypes.BsonInt64:
+                    case BsonTypes.BsonString:
+                        item = JValue.FromBson(bsonType, buffer, ref offset);
+                        break;
+                }
+                result.Add(ename, item);
+            }
+
+            return result;
         }
 
     }

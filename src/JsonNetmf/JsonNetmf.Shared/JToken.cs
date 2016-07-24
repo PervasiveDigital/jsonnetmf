@@ -88,7 +88,10 @@ namespace PervasiveDigital.Json
             int startingOffset = offset;
 #endif
 
-            buffer[offset++] = (byte)this.GetBsonType();
+            if (buffer!=null)
+                buffer[offset] = (byte)this.GetBsonType();
+            ++offset;
+
             MarshallEName(ename, buffer, ref offset);
             ToBson(buffer, ref offset);
 
@@ -101,9 +104,32 @@ namespace PervasiveDigital.Json
         protected void MarshallEName(string ename, byte[] buffer, ref int offset)
         {
             var name = Encoding.UTF8.GetBytes(ename);
-            Array.Copy(name, 0, buffer, offset, name.Length);
+            if (buffer!=null)
+                Array.Copy(name, 0, buffer, offset, name.Length);
             offset += name.Length;
-            buffer[offset++] = 0;
+            if (buffer!=null)
+                buffer[offset] = 0;
+            ++offset;
+        }
+
+        internal static String ConvertToString(Byte[] byteArray, int start, int count)
+        {
+            var _chars = new char[byteArray.Length];
+            bool _completed;
+            int _bytesUsed, _charsUsed;
+            Encoding.UTF8.GetDecoder().Convert(byteArray, start, count, _chars, 0, byteArray.Length, false, out _bytesUsed, out _charsUsed, out _completed);
+            return new string(_chars, 0, _charsUsed);
+        }
+
+        internal static int FindNul(byte[] buffer, int start)
+        {
+            int current = start;
+            while (current < buffer.Length)
+            {
+                if (buffer[current++] == 0)
+                    return current - 1;
+            }
+            return -1;
         }
 
     }

@@ -111,25 +111,44 @@ namespace PervasiveDigital.Json
 
 		public override int GetBsonSize()
 		{
-			throw new NotImplementedException();
-		}
+            int offset = 0;
+            this.ToBson(null, ref offset);
+            return offset;
+        }
 
-		public override int GetBsonSize(string ename)
+        public override int GetBsonSize(string ename)
 		{
-			throw new NotImplementedException();
-		}
+            return 1 + ename.Length + 1 + this.GetBsonSize();
+        }
 
-		public override void ToBson(byte[] buffer, ref int offset)
+        public override void ToBson(byte[] buffer, ref int offset)
 		{
-			throw new NotImplementedException();
-		}
+            int startingOffset = offset;
+
+            // leave space for the size
+            offset += 4;
+
+            for (int i = 0; i < _contents.Length; ++i)
+            {
+                _contents[i].ToBson(i.ToString(), buffer, ref offset);
+            }
+
+            // Write the trailing nul
+            if (buffer!=null)
+                buffer[offset] = (byte)0;
+            ++offset;
+
+            // Write the completed size
+            if (buffer!=null)
+                SerializationUtilities.Marshall(buffer, ref startingOffset, offset);
+        }
 
         public override BsonTypes GetBsonType()
         {
             return BsonTypes.BsonArray;
         }
 
-        internal static JArray FromBson(byte[] buffer, InstanceFactory factory = null)
+        internal static JArray FromBson(byte[] buffer, ref int offset, InstanceFactory factory = null)
         {
             throw new NotImplementedException();
         }
