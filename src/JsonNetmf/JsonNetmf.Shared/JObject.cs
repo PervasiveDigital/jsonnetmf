@@ -184,8 +184,11 @@ namespace PervasiveDigital.Json
                 switch (bsonType)
                 {
                     case BsonTypes.BsonArray:
+                        item = JArray.FromBson(buffer, ref offset, factory);
+                        break;
                     case BsonTypes.BsonDocument:
-                        throw new NotImplementedException();
+                        item = JObject.FromBson(buffer, ref offset, factory);
+                        break;
                     case BsonTypes.BsonNull:
                         item = new JValue();
                         break;

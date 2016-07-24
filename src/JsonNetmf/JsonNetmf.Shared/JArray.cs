@@ -2,6 +2,7 @@
 // Use of this code and resulting binaries is permitted only under the
 // terms of a written license.
 using System;
+using System.Collections;
 using System.Text;
 
 namespace PervasiveDigital.Json
@@ -150,7 +151,57 @@ namespace PervasiveDigital.Json
 
         internal static JArray FromBson(byte[] buffer, ref int offset, InstanceFactory factory = null)
         {
-            throw new NotImplementedException();
+            BsonTypes elementType = (BsonTypes)0;
+
+            int len = (Int32)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int32);
+
+            var list = new ArrayList();
+            int idx = 0;
+            while (offset < offset + len)
+            {
+                // get the element type
+                var bsonType = (BsonTypes)buffer[offset++];
+                if (elementType == (BsonTypes)0)
+                    elementType = bsonType;
+                if (bsonType != elementType)
+                    throw new Exception("all array elements must be of the same type");
+
+                // get the element name
+                var idxNul = JToken.FindNul(buffer, offset);
+                if (idxNul == -1)
+                    throw new Exception("Missing ename terminator");
+                var ename = JToken.ConvertToString(buffer, offset, idxNul - offset);
+                var elemIdx = int.Parse(ename);
+                if (elemIdx != idx)
+                    throw new Exception("sparse arrays are not supported");
+                ++idx;
+
+                offset = idxNul + 1;
+
+                JToken item = null;
+                switch (bsonType)
+                {
+                    case BsonTypes.BsonArray:
+                        item = JArray.FromBson(buffer, ref offset, factory);
+                        break;
+                    case BsonTypes.BsonDocument:
+                        item = JObject.FromBson(buffer, ref offset, factory);
+                        break;
+                    case BsonTypes.BsonNull:
+                        item = new JValue();
+                        break;
+                    case BsonTypes.BsonBoolean:
+                    case BsonTypes.BsonDateTime:
+                    case BsonTypes.BsonDouble:
+                    case BsonTypes.BsonInt32:
+                    case BsonTypes.BsonInt64:
+                    case BsonTypes.BsonString:
+                        item = JValue.FromBson(bsonType, buffer, ref offset);
+                        break;
+                }
+                list.Add(item);
+            }
+            return new JArray((JToken[])list.ToArray(typeof(JToken)));
         }
     }
 }
