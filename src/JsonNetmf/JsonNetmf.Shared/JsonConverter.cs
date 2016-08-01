@@ -180,14 +180,20 @@ namespace PervasiveDigital.Json
 			}
 			else if (root is JArray)
 			{
-				if (factory == null)
+                var elemType = type.GetElementType();
+				if (elemType == null && factory == null)
 					throw new NotSupportedException("You must provide an instance factory if you want to populate objects that have arrays in them");
 
 				var jarray = (JArray)root;
 				var list = new ArrayList();
-				var array = (Array)factory(path, null, jarray.Length);
-				//var array = Array.CreateInstance(type.GetElementType(), jarray.Length);
-				foreach (var item in jarray.Items)
+
+                Array array;
+                if (elemType!=null)
+				    array = Array.CreateInstance(type.GetElementType(), jarray.Length);
+                else
+    				array = (Array)factory(path, null, jarray.Length);
+	
+                foreach (var item in jarray.Items)
 				{
 					if (item is JValue)
 						list.Add(((JValue)item).Value);
@@ -253,7 +259,7 @@ namespace PervasiveDigital.Json
             int len = (Int32)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int32);
 
             JToken dserResult = null;
-            while (offset < buffer.Length)
+            while (offset < buffer.Length - 1)
             {
                 var bsonType = (BsonTypes)buffer[offset++];
 
@@ -276,6 +282,8 @@ namespace PervasiveDigital.Json
                         throw new Exception("unexpected top-level object type in bson");
                 }
             }
+            if (buffer[offset++]!=0)
+                throw new Exception("bad format - missing trailing null on bson document");
             return PopulateObject(dserResult, resultType, "/", factory);
         }
 

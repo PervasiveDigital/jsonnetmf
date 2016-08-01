@@ -141,7 +141,7 @@ namespace PervasiveDigital.Json
 
             // Write the completed size
             if (buffer!=null)
-                SerializationUtilities.Marshall(buffer, ref startingOffset, offset);
+                SerializationUtilities.Marshall(buffer, ref startingOffset, offset - startingOffset);
         }
 
         public override BsonTypes GetBsonType()
@@ -153,11 +153,12 @@ namespace PervasiveDigital.Json
         {
             BsonTypes elementType = (BsonTypes)0;
 
+            int startingOffset = offset;
             int len = (Int32)SerializationUtilities.Unmarshall(buffer, ref offset, TypeCode.Int32);
 
             var list = new ArrayList();
             int idx = 0;
-            while (offset < offset + len)
+            while (offset < startingOffset + len - 1)
             {
                 // get the element type
                 var bsonType = (BsonTypes)buffer[offset++];
@@ -201,6 +202,8 @@ namespace PervasiveDigital.Json
                 }
                 list.Add(item);
             }
+            if (buffer[offset++] != 0)
+                throw new Exception("bad format - missing trailing null on bson document");
             return new JArray((JToken[])list.ToArray(typeof(JToken)));
         }
     }

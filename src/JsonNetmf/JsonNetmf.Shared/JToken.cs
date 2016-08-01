@@ -104,10 +104,10 @@ namespace PervasiveDigital.Json
         protected void MarshallEName(string ename, byte[] buffer, ref int offset)
         {
             var name = Encoding.UTF8.GetBytes(ename);
-            if (buffer!=null)
+            if (buffer != null && ename.Length > 0)
                 Array.Copy(name, 0, buffer, offset, name.Length);
             offset += name.Length;
-            if (buffer!=null)
+            if (buffer != null)
                 buffer[offset] = 0;
             ++offset;
         }
