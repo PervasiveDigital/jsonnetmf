@@ -23,12 +23,49 @@ namespace JsonNetmf.test
         public ChildClass child1;
         public ChildClass Child { get; set; }
     }
+
     public class Program
     {
         public static void Main()
         {
             DoArrayTest();
+            DoSimpleObjectTest();
+            DoComplexObjectTest();
+        }
 
+        private static void DoArrayTest()
+        {
+            int[] intArray = new[] { 1, 3, 5, 7, 9 };
+
+            var result = JsonConverter.Serialize(intArray);
+            var bson = result.ToBson();
+            var compare = JsonConverter.FromBson(bson, typeof(int[]));
+            if (!ArraysAreEqual(intArray, (Array)compare))
+                throw new Exception("array test failed");
+            Debug.Print("Array test succeeded");
+        }
+
+        private static void DoSimpleObjectTest()
+        {
+            var source = new ChildClass()
+            {
+                one = 1,
+                two = 2,
+                three = 3
+            };
+
+            var serialized = JsonConverter.Serialize(source);
+            var bson = serialized.ToBson();
+            var compare = (ChildClass)JsonConverter.FromBson(bson, typeof(ChildClass));
+            if (source.one != compare.one ||
+                source.two != compare.two ||
+                source.three != compare.three)
+                throw new Exception("simple object test failed");
+            Debug.Print("simple object test passed");
+        }
+
+        private static void DoComplexObjectTest()
+        {
             var test = new TestClass()
             {
                 aString = "A string",
@@ -57,21 +94,11 @@ namespace JsonNetmf.test
                 !ArraysAreEqual(test.intArray, newInstance.intArray) ||
                 !ArraysAreEqual(test.stringArray, newInstance.stringArray)
                 )
-                throw new Exception("round-tripping failed");
+                throw new Exception("complex object test failed");
 
             // bson tests
             var bson = result.ToBson();
-            var compare = JsonConverter.FromBson(bson, typeof(TestClass));
-        }
-
-        private static void DoArrayTest()
-        {
-            int[] intArray = new[] { 1, 3, 5, 7, 9 };
-
-            var result = JsonConverter.Serialize(intArray);
-            var bson = result.ToBson();
-            var compare = JsonConverter.FromBson(bson, typeof(int[]));
-
+            var compare = JsonConverter.FromBson(bson, typeof(TestClass), CreateInstance);
         }
 
         private static object CreateInstance(string path, string name, int length)

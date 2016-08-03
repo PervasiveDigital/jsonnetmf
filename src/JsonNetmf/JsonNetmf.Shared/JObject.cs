@@ -145,7 +145,7 @@ namespace PervasiveDigital.Json
 
             foreach (DictionaryEntry member in _members)
             {
-                ((JProperty)member.Value).ToBson(member.Key.ToString(), buffer, ref offset);
+                ((JProperty)member.Value).ToBson(((JProperty)member.Value).Name, buffer, ref offset);
             }
 
             // Write the trailing nul
@@ -155,7 +155,7 @@ namespace PervasiveDigital.Json
 
             // Write the completed size
             if (buffer!=null)
-                SerializationUtilities.Marshall(buffer, ref startingOffset, offset);
+                SerializationUtilities.Marshall(buffer, ref startingOffset, offset - startingOffset);
 		}
 
         public override BsonTypes GetBsonType()

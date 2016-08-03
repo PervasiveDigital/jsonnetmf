@@ -122,11 +122,19 @@ namespace PervasiveDigital.Json
 								else
 								{
 									DateTime dt;
-									var sdt = ((JValue)prop.Value).Value.ToString();
-									if (sdt.Contains("Date("))
-										dt = DateTimeExtensions.FromASPNetAjax(sdt);
-									else
-										dt = DateTimeExtensions.FromIso8601(sdt);
+                                    var sdtValue = ((JValue)prop.Value).Value;
+                                    if (sdtValue is DateTime)
+                                    {
+                                        dt = (DateTime)sdtValue;
+                                    }
+                                    else
+                                    {
+                                        var sdt = sdtValue.ToString();
+                                        if (sdt.Contains("Date("))
+                                            dt = DateTimeExtensions.FromASPNetAjax(sdt);
+                                        else
+                                            dt = DateTimeExtensions.FromIso8601(sdt);
+                                    }
 									field.SetValue(instance, dt);
 								}
 							}
