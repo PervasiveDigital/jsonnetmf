@@ -1,12 +1,13 @@
-﻿// (c) Pervasive Digital LLC
-// Use of this code and resulting binaries is permitted only under the
-// terms of a written license.
 using System;
 using System.Collections;
 using System.Reflection;
 using System.Text;
 
+#if (MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4)
 namespace PervasiveDigital.Json
+#else
+namespace GHIElectronics.TinyCLR.Data.Json
+#endif
 {
 	public class JObject : JToken
 	{
@@ -22,6 +23,10 @@ namespace PervasiveDigital.Json
 				_members.Add(value.Name.ToLower(), value);
 			}
 		}
+
+#if (!MF_FRAMEWORK_VERSION_V4_3 || !MF_FRAMEWORK_VERSION_V4_4)
+        public bool Contains(string name) => this._members.Contains(name.ToLower());
+#endif
 
 		public ICollection Members
 		{
@@ -51,8 +56,19 @@ namespace PervasiveDigital.Json
 					if (m.ReturnType.IsArray)
 						result._members.Add(name.ToLower(), new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
 					else
-						result._members.Add(name.ToLower(), new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
-				}
+#if (!MF_FRAMEWORK_VERSION_V4_3 || !MF_FRAMEWORK_VERSION_V4_4)
+					{
+						if (m.ReturnType.IsValueType || m.ReturnType == typeof(string))
+                        {
+                            result._members.Add(name.ToLower(), new JProperty(name, JValue.Serialize(m.ReturnType, methodResult)));
+                        }
+                        else
+#endif
+						{
+                            result._members.Add(name.ToLower(), new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
+                        }
+                    }
+                }
 			}
 
 			var fields = type.GetFields();

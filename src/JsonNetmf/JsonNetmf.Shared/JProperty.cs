@@ -1,10 +1,11 @@
-﻿// (c) Pervasive Digital LLC
-// Use of this code and resulting binaries is permitted only under the
-// terms of a written license.
-using System;
+﻿using System;
 using System.Text;
 
+#if (MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4)
 namespace PervasiveDigital.Json
+#else
+namespace GHIElectronics.TinyCLR.Data.Json
+#endif
 {
 	public class JProperty : JToken
 	{

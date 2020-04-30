@@ -1,10 +1,11 @@
-﻿// (c) Pervasive Digital LLC
-// Use of this code and resulting binaries is permitted only under the
-// terms of a written license.
 using System;
+#if (MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4)
 using Microsoft.SPOT;
 
 namespace PervasiveDigital.Json
+#else
+namespace GHIElectronics.TinyCLR.Data.Json
+#endif
 {
 	public static class DateTimeExtensions
 	{
@@ -130,7 +131,11 @@ namespace PervasiveDigital.Json
 			if (utc)
 			{
 				// Convert the Kind to DateTimeKind.Utc if string Z present
+#if (MF_FRAMEWORK_VERSION_V4_3 || MF_FRAMEWORK_VERSION_V4_4)
 				dt = new DateTime(0, DateTimeKind.Utc).AddTicks(dt.Ticks);
+#else
+				dt = new DateTime(dt.Ticks, DateTimeKind.Utc);
+#endif
 			}
 
 			return dt;
@@ -142,7 +147,7 @@ namespace PervasiveDigital.Json
 		/// </summary>
 		/// <param name="dt"></param>
 		/// <returns></returns>
-		public static string ToIso8601(DateTime dt)
+        public static string ToIso8601(DateTime dt)
 		{
 			string result = dt.Year.ToString() + "-" +
 							TwoDigits(dt.Month) + "-" +
