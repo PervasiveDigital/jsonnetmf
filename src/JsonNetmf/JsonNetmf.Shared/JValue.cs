@@ -1,6 +1,8 @@
-﻿// (c) Pervasive Digital LLC
-// Use of this code and resulting binaries is permitted only under the
-// terms of a written license.
+﻿//
+// Copyright (c) Pervasive Digital LLC
+// See LICENSE file in the project root for full license information.
+//
+
 using System;
 
 namespace PervasiveDigital.Json
